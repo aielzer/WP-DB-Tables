@@ -9,9 +9,12 @@ Author URI: http://ailenepecayo.com/
 function create_the_custom_table() {
     global $wpdb;
   
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    
     $charset_collate = $wpdb->get_charset_collate();
-
+    
     $table_name1 = $wpdb->prefix . 'soh_availability_bareroot';
+    $table_name2 = $wpdb->prefix . 'term_taxonomymeta';
 
     $sql = "CREATE TABLE IF NOT EXISTS " . $table_name1 . " (
       id                bigint(20) unsigned NOT NULL auto_increment,
@@ -36,9 +39,18 @@ function create_the_custom_table() {
       KEY seed_source (seed_source),
       KEY stem_type (stem_type)
     ) $charset_collate;";
- 
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
+    
+    $sql = "CREATE TABLE IF NOT EXISTS " . $table_name2 . " (
+		meta_id bigint(20) unsigned NOT NULL auto_increment,
+		term_taxonomy_id bigint(20) unsigned NOT NULL default '0',
+		meta_key varchar(255) default NULL,
+		meta_value longtext,
+		PRIMARY KEY  (meta_id),
+		KEY term_taxonomy_id (term_taxonomy_id),
+		KEY meta_key (meta_key)
+    ) $charset_collate;";
+    dbDelta($sql);    
 }
 
 register_activation_hook(__FILE__, 'create_the_custom_table');
